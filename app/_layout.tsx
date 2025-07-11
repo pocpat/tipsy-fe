@@ -1,5 +1,6 @@
 import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { PaperProvider } from 'react-native-paper';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -74,7 +75,9 @@ export default function RootLayout() {
   return (
     <ClerkProvider publishableKey={publishableKey}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <InitialLayout />
+        <PaperProvider>
+          <InitialLayout />
+        </PaperProvider>
         <StatusBar style="auto" />
       </ThemeProvider>
     </ClerkProvider>
