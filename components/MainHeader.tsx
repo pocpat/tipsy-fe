@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { Menu, Appbar, Divider } from 'react-native-paper';
 
@@ -13,13 +13,13 @@ export function MainHeader() {
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
 
-  const router = useRouter();
+  const navigation = useNavigation();
   const { isSignedIn } = useUser();
   const { signOut } = useAuth();
   const colorScheme = useColorScheme();
 
   const handleNavigation = (path: string) => {
-    router.push(path);
+    navigation.navigate(path as never);
     closeMenu();
   };
 

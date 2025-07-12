@@ -1,5 +1,5 @@
 import { useAuth, useOAuth } from '@clerk/clerk-expo';
-import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
@@ -8,9 +8,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 const WelcomeScreen = () => {
   const { isSignedIn } = useAuth();
-  const router = useRouter();
-
-  useWarmUpBrowser();
+  const navigation = useNavigation();
 
   const { startOAuthFlow } = useOAuth({
     strategy: 'oauth_google',
@@ -43,7 +41,7 @@ const WelcomeScreen = () => {
 
       <TouchableOpacity
         style={[styles.button, !isSignedIn && styles.buttonDisabled]}
-        onPress={() => router.push('/design')}
+        onPress={() => navigation.navigate('design' as never)}
         disabled={!isSignedIn}>
         <Text style={styles.buttonText}>Press to start</Text>
       </TouchableOpacity>

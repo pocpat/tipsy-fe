@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Text, StyleSheet, FlatList, Image, Pressable, ActivityIndicator, Alert, Switch, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { FullScreenImageModal } from '@/components/FullScreenImageModal';
 import { getMyDesigns, deleteDesign, toggleFavorite } from '@/lib/api';

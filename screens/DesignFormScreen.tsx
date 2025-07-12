@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import NailLengthSelector from '@/components/design/NailLengthSelector';
 import NailShapeSelector from '@/components/design/NailShapeSelector';
 import NailStyleSelector from '@/components/design/NailStyleSelector';
@@ -7,6 +8,7 @@ import ColorHarmonySelector from '@/components/design/ColorHarmonySelector';
 import { AppScreenLayout } from '@/components/AppScreenLayout';
 
 const DesignFormScreen = () => {
+  const navigation = useNavigation();
   const [activeRow, setActiveRow] = useState('length');
   const [selections, setSelections] = useState({
     length: null,
@@ -55,7 +57,7 @@ const DesignFormScreen = () => {
         />
 
         {allSelectionsMade && (
-          <TouchableOpacity style={styles.impressButton}>
+          <TouchableOpacity style={styles.impressButton} onPress={() => navigation.navigate('results' as never, { selections })}>
             <Text style={styles.impressButtonText}>Impress Me</Text>
           </TouchableOpacity>
         )}

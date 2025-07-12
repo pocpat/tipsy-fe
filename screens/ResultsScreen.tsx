@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, FlatList, Image, Pressable, ActivityIndicator, Alert } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useRoute } from '@react-navigation/native';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { FullScreenImageModal } from '@/components/FullScreenImageModal';
-import { saveDesign } from '@/lib/api';
+import { saveDesign, generateDesigns } from '@/lib/api';
 import { useAuth } from '@clerk/clerk-expo';
 import { AppScreenLayout } from '@/components/AppScreenLayout';
 
@@ -17,17 +17,36 @@ interface DesignResult {
 
 const ResultsScreen = () => {
   const { isLoaded, isSignedIn } = useAuth();
-  const params = useLocalSearchParams();
+  const route = useRoute();
+  const { selections } = route.params as { selections: any };
   const [loading, setLoading] = useState(false);
   const [savedStates, setSavedStates] = useState<{ [key: string]: boolean }>({});
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  const modelResults: string[] = params.modelResults
-    ? JSON.parse(params.modelResults as string)
-    : [];
-  const designData: Omit<DesignResult, 'imageUrl'> = params.designData
-    ? JSON.parse(params.designData as string)
-    : {};
+  useEffect(() => {
+    const fetchDesigns = async () => {
+      setLoading(true);
+      setApiError(null);
+      try {
+        const response = await generateDesigns(selections);
+        setGeneratedImages(response.imageUrls);
+      } catch (error: any) {
+        console.error('Failed to generate designs:', error);
+        setApiError(error.message || 'Failed to generate designs.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (selections) {
+      fetchDesigns();
+    }
+  }, [selections]);
+
+  const modelResults: string[] = generatedImages;
+  const designData: Omit<DesignResult, 'imageUrl'> = selections;
 
   const handleSaveDesign = async (imageUrl: string) => {
     if (!isSignedIn) {
@@ -75,8 +94,21 @@ const ResultsScreen = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Saving design...</Text>
+        <Text>Generating designs...</Text>
       </View>
+    );
+  }
+
+  if (apiError) {
+    return (
+      <AppScreenLayout>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Error: {apiError}</Text>
+          <Pressable style={styles.retryButton} onPress={() => fetchDesigns()}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </Pressable>
+        </View>
+      </AppScreenLayout>
     );
   }
 
@@ -148,6 +180,28 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 8,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 18,
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
 
