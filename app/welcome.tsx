@@ -1,4 +1,4 @@
-import { useAuth, useOAuth, useWarmUpBrowser } from '@clerk/clerk-expo';
+import { useAuth, useOAuth } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
@@ -18,30 +18,33 @@ const WelcomeScreen = () => {
 
   const onSignInPress = React.useCallback(async () => {
     try {
-      const { createdSessionId, signIn, signUp, setActive } = await startOAuthFlow();
+      const { createdSessionId, setActive } = await startOAuthFlow();
 
-      if (createdSessionId) {
+      if (createdSessionId && setActive) {
         setActive({ session: createdSessionId });
-      } else {
-        // Use signIn or signUp for next steps such as MFA
       }
     } catch (err) {
-      console.error("OAuth error", err);
+      if (err instanceof Error) {
+        if (err.message.includes("cancelled by user")) {
+          console.log("OAuth flow cancelled by user.");
+        } else {
+          console.error("OAuth error:", err.message);
+        }
+      } else {
+        console.error("An unexpected error occurred:", err);
+      }
     }
   }, []);
-
-  // This should not happen based on the layout logic, but as a safeguard:
-  if (isSignedIn) {
-    router.replace('/(tabs)');
-    return null;
-  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tipsy</Text>
       <Text style={styles.subtitle}>AI Nail Design Studio</Text>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/(tabs)')}>
+      <TouchableOpacity
+        style={[styles.button, !isSignedIn && styles.buttonDisabled]}
+        onPress={() => router.push('/design')}
+        disabled={!isSignedIn}>
         <Text style={styles.buttonText}>Press to start</Text>
       </TouchableOpacity>
 
@@ -77,6 +80,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 80,
     borderRadius: 25,
     marginBottom: 20,
+  },
+  buttonDisabled: {
+    backgroundColor: '#cccccc',
   },
   buttonText: {
     color: '#fff',

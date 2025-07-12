@@ -38,12 +38,12 @@ export function MainHeader() {
           anchor={<Appbar.Action icon="dots-vertical" onPress={openMenu} />}>
           {isSignedIn && (
             <Menu.Item
-              onPress={() => handleNavigation('/(tabs)/my-designs')}
+              onPress={() => handleNavigation('/my-designs')}
               title="My Designs"
             />
           )}
           <Menu.Item
-            onPress={() => handleNavigation('/(tabs)')}
+            onPress={() => handleNavigation('/design')}
             title="Start Over"
           />
           <Divider />
