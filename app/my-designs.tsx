@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Text, StyleSheet, FlatList, Image, Pressable, ActivityIndicator, Alert, Switch } from 'react-native';
+import { Text, StyleSheet, FlatList, Image, Pressable, ActivityIndicator, Alert, Switch, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { FullScreenImageModal } from '@/components/FullScreenImageModal';
@@ -240,59 +240,4 @@ const styles = StyleSheet.create({
   },
 });
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#f0f0f0',
-  },
-  centeredContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 16,
-  },
-  toggleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    marginBottom: 16,
-  },
-  gridContainer: {
-    justifyContent: 'center',
-  },
-  card: {
-    flex: 1,
-    margin: 8,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    overflow: 'hidden',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  image: {
-    width: '100%',
-    height: 150,
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    flexDirection: 'row',
-    opacity: 0,
-  },
-  iconButton: {
-    padding: 8,
-  },
-});
+
