@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Text, StyleSheet, FlatList, Image, Pressable, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, Image, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { FullScreenImageModal } from '@/components/FullScreenImageModal';
@@ -16,7 +16,7 @@ interface DesignResult {
 }
 
 const ResultsScreen = () => {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
   const route = useRoute();
   const { selections } = route.params as { selections: any };
   const [loading, setLoading] = useState(false);
@@ -25,25 +25,25 @@ const ResultsScreen = () => {
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchDesigns = async () => {
-      setLoading(true);
-      setApiError(null);
-      try {
-        const response = await generateDesigns(selections);
-        setGeneratedImages(response.imageUrls);
-      } catch (error: any) {
-        console.error('Failed to generate designs:', error);
-        setApiError(error.message || 'Failed to generate designs.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchDesigns = useCallback(async () => {
+    setLoading(true);
+    setApiError(null);
+    try {
+      const response = await generateDesigns(selections, getToken);
+      setGeneratedImages(response.imageUrls);
+    } catch (error: any) {
+      console.error('Failed to generate designs:', error);
+      setApiError(error.message || 'Failed to generate designs.');
+    } finally {
+      setLoading(false);
+    }
+  }, [selections]);
 
+  useEffect(() => {
     if (selections) {
       fetchDesigns();
     }
-  }, [selections]);
+  }, [selections, fetchDesigns]);
 
   const modelResults: string[] = generatedImages;
   const designData: Omit<DesignResult, 'imageUrl'> = selections;
@@ -56,7 +56,7 @@ const ResultsScreen = () => {
 
     setLoading(true);
     try {
-      await saveDesign({ ...designData, imageUrl });
+      await saveDesign({ ...designData, imageUrl }, getToken);
       setSavedStates((prev) => ({ ...prev, [imageUrl]: true }));
       Alert.alert('Success', 'Design saved successfully!');
     } catch (error: any) {

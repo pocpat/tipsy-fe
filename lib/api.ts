@@ -1,4 +1,6 @@
-import { getAuth } from '@clerk/clerk-expo';
+
+
+import { GetToken } from '@clerk/types';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
@@ -18,8 +20,7 @@ interface SaveDesignData {
   colors: string[];
 }
 
-export async function generateDesigns(formData: DesignFormData) {
-  const { getToken } = getAuth();
+export async function generateDesigns(formData: DesignFormData, getToken: GetToken) {
   const token = await getToken();
 
   if (!token) {
@@ -43,8 +44,7 @@ export async function generateDesigns(formData: DesignFormData) {
   return response.json();
 }
 
-export async function saveDesign(designData: SaveDesignData) {
-  const { getToken } = getAuth();
+export async function saveDesign(designData: SaveDesignData, getToken: GetToken) {
   const token = await getToken();
 
   if (!token) {
@@ -68,8 +68,7 @@ export async function saveDesign(designData: SaveDesignData) {
   return response.json();
 }
 
-export async function getMyDesigns() {
-  const { getToken } = getAuth();
+export async function getMyDesigns(getToken: GetToken) {
   const token = await getToken();
 
   if (!token) {
@@ -91,8 +90,7 @@ export async function getMyDesigns() {
   return response.json();
 }
 
-export async function deleteDesign(designId: string) {
-  const { getToken } = getAuth();
+export async function deleteDesign(designId: string, getToken: GetToken) {
   const token = await getToken();
 
   if (!token) {
@@ -114,8 +112,7 @@ export async function deleteDesign(designId: string) {
   return response.json();
 }
 
-export async function toggleFavorite(designId: string) {
-  const { getToken } = getAuth();
+export async function toggleFavorite(designId: string, getToken: GetToken) {
   const token = await getToken();
 
   if (!token) {

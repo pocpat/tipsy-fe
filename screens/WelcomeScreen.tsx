@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import { Alert } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -15,22 +16,21 @@ const WelcomeScreen = () => {
   });
 
   const onSignInPress = React.useCallback(async () => {
+    console.log('onSignInPress called');
     try {
-      const { createdSessionId, setActive } = await startOAuthFlow();
+      console.log('Before startOAuthFlow');
+      const redirectUrl = WebBrowser.makeRedirectUri({ scheme: 'tipsyfe' });
+      console.log('Redirect URL:', redirectUrl);
+      const { createdSessionId, setActive } = await startOAuthFlow({ redirectUrl });
+      console.log('After startOAuthFlow');
+      console.log('OAuth flow completed.');
 
       if (createdSessionId && setActive) {
         setActive({ session: createdSessionId });
       }
-    } catch (err) {
-      if (err instanceof Error) {
-        if (err.message.includes("cancelled by user")) {
-          console.log("OAuth flow cancelled by user.");
-        } else {
-          console.error("OAuth error:", err.message);
-        }
-      } else {
-        console.error("An unexpected error occurred:", err);
-      }
+    } catch (err: any) {
+      console.error("OAuth error:", err);
+      Alert.alert("Login Error", err.message || "An unexpected error occurred during login.");
     }
   }, []);
 
