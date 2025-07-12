@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, Pressable, ActivityIndicator, Alert, Switch } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { Text, StyleSheet, FlatList, Image, Pressable, ActivityIndicator, Alert, Switch, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { FullScreenImageModal } from '@/components/FullScreenImageModal';
 import { getMyDesigns, deleteDesign, toggleFavorite } from '@/lib/api';
 import { useAuth } from '@clerk/clerk-expo';
+import { AppScreenLayout } from '@/components/AppScreenLayout';
 
 interface Design {
   _id: string;
@@ -19,7 +20,7 @@ interface Design {
 }
 
 export default function MyDesignsScreen() {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
   const [designs, setDesigns] = useState<Design[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -124,7 +125,7 @@ export default function MyDesignsScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <AppScreenLayout>
       <View style={styles.toggleContainer}>
         <Text>Show Favorites Only</Text>
         <Switch
@@ -178,7 +179,7 @@ export default function MyDesignsScreen() {
           onClose={() => setFullScreenImage(null)}
         />
       )}
-    </View>
+    </AppScreenLayout>
   );
 }
 
@@ -238,3 +239,5 @@ const styles = StyleSheet.create({
     padding: 8,
   },
 });
+
+

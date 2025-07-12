@@ -1,47 +1,48 @@
-import { useAuth, useOAuth, useWarmUpBrowser } from '@clerk/clerk-expo';
-import { useRouter } from 'expo-router';
+import { useAuth, useOAuth } from '@clerk/clerk-expo';
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import { Alert } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
 
 const WelcomeScreen = () => {
   const { isSignedIn } = useAuth();
-  const router = useRouter();
-
-  useWarmUpBrowser();
+  const navigation = useNavigation();
 
   const { startOAuthFlow } = useOAuth({
     strategy: 'oauth_google',
   });
 
   const onSignInPress = React.useCallback(async () => {
+    console.log('onSignInPress called');
     try {
-      const { createdSessionId, signIn, signUp, setActive } = await startOAuthFlow();
+      console.log('Before startOAuthFlow');
+      const redirectUrl = WebBrowser.makeRedirectUri({ scheme: 'tipsyfe' });
+      console.log('Redirect URL:', redirectUrl);
+      const { createdSessionId, setActive } = await startOAuthFlow({ redirectUrl });
+      console.log('After startOAuthFlow');
+      console.log('OAuth flow completed.');
 
-      if (createdSessionId) {
+      if (createdSessionId && setActive) {
         setActive({ session: createdSessionId });
-      } else {
-        // Use signIn or signUp for next steps such as MFA
       }
-    } catch (err) {
-      console.error("OAuth error", err);
+    } catch (err: any) {
+      console.error("OAuth error:", err);
+      Alert.alert("Login Error", err.message || "An unexpected error occurred during login.");
     }
   }, []);
-
-  // This should not happen based on the layout logic, but as a safeguard:
-  if (isSignedIn) {
-    router.replace('/(tabs)');
-    return null;
-  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tipsy</Text>
       <Text style={styles.subtitle}>AI Nail Design Studio</Text>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/(tabs)')}>
+      <TouchableOpacity
+        style={[styles.button, !isSignedIn && styles.buttonDisabled]}
+        onPress={() => navigation.navigate('design' as never)}
+        disabled={!isSignedIn}>
         <Text style={styles.buttonText}>Press to start</Text>
       </TouchableOpacity>
 
@@ -77,6 +78,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 80,
     borderRadius: 25,
     marginBottom: 20,
+  },
+  buttonDisabled: {
+    backgroundColor: '#cccccc',
   },
   buttonText: {
     color: '#fff',

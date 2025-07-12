@@ -1,16 +1,22 @@
-import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
+import { ClerkProvider } from '@clerk/clerk-expo';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { PaperProvider } from 'react-native-paper';
 import { useFonts } from 'expo-font';
-import { SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { MainHeader } from '../components/MainHeader';
+import { Footer } from '../components/Footer';
 
-import { MainHeader } from '@/components/MainHeader';
-import { Footer } from '@/components/Footer';
-import { View } from 'react-native';
+// Import your screens
+import WelcomeScreen from '../screens/WelcomeScreen';
+import DesignFormScreen from '../screens/DesignFormScreen';
+import ResultsScreen from '../screens/ResultsScreen';
+import MyDesignsScreen from '../screens/MyDesignsScreen';
+import NotFoundScreen from '../screens/NotFoundScreen';
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
@@ -21,36 +27,7 @@ if (!publishableKey) {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-function InitialLayout() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const segments = useSegments();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoaded) {
-      return;
-    }
-
-    const inTabsGroup = segments[0] === '(tabs)';
-
-    if (isSignedIn && !inTabsGroup) {
-      // Redirect to the main app
-      router.replace('/(tabs)');
-    } else if (!isSignedIn && segments[0] !== 'welcome') {
-      // Redirect to the welcome screen
-      router.replace('/welcome');
-    }
-  }, [isLoaded, isSignedIn]);
-
-  return (
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="welcome" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-  );
-}
-
+const Stack = createNativeStackNavigator();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -76,9 +53,16 @@ export default function RootLayout() {
     <ClerkProvider publishableKey={publishableKey}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <PaperProvider>
-          <InitialLayout />
+          <Stack.Navigator>
+            <Stack.Screen name="welcome" component={WelcomeScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="design" component={DesignFormScreen} options={{ header: () => <MainHeader /> }} />
+            <Stack.Screen name="results" component={ResultsScreen} options={{ header: () => <MainHeader /> }} />
+            <Stack.Screen name="my-designs" component={MyDesignsScreen} options={{ header: () => <MainHeader /> }} />
+            <Stack.Screen name="+not-found" component={NotFoundScreen} options={{ header: () => <MainHeader /> }} />
+          </Stack.Navigator>
+          <Footer />
+          <StatusBar style="auto" />
         </PaperProvider>
-        <StatusBar style="auto" />
       </ThemeProvider>
     </ClerkProvider>
   );
