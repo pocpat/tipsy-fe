@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import { makeRedirectUri } from 'expo-auth-session';
 import { Alert } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -19,7 +20,7 @@ const WelcomeScreen = () => {
     console.log('onSignInPress called');
     try {
       console.log('Before startOAuthFlow');
-      const redirectUrl = WebBrowser.makeRedirectUri({ scheme: 'tipsyfe' });
+      const redirectUrl = makeRedirectUri({ scheme: 'tipsyfe' });
       console.log('Redirect URL:', redirectUrl);
       const { createdSessionId, setActive } = await startOAuthFlow({ redirectUrl });
       console.log('After startOAuthFlow');
