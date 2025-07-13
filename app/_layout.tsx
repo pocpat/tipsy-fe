@@ -1,13 +1,13 @@
-import React from 'react';
-import { ClerkProvider } from '@clerk/clerk-expo';
+import React, { useEffect } from 'react';
+import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-expo';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { PaperProvider } from 'react-native-paper';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
 import 'react-native-reanimated';
+
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { MainHeader } from '../components/MainHeader';
 import { Footer } from '../components/Footer';
@@ -29,6 +29,18 @@ if (!publishableKey) {
 SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator();
+
+// Main app navigator, shown only when the user is signed in
+function AppNavigator() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="design" component={DesignFormScreen} options={{ header: () => <MainHeader /> }} />
+      <Stack.Screen name="results" component={ResultsScreen} options={{ header: () => <MainHeader /> }} />
+      <Stack.Screen name="my-designs" component={MyDesignsScreen} options={{ header: () => <MainHeader /> }} />
+      <Stack.Screen name="+not-found" component={NotFoundScreen} options={{ header: () => <MainHeader /> }} />
+    </Stack.Navigator>
+  );
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -54,13 +66,12 @@ export default function RootLayout() {
     <ClerkProvider publishableKey={publishableKey}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <PaperProvider>
-          <Stack.Navigator>
-            <Stack.Screen name="welcome" component={WelcomeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="design" component={DesignFormScreen} options={{ header: () => <MainHeader /> }} />
-            <Stack.Screen name="results" component={ResultsScreen} options={{ header: () => <MainHeader /> }} />
-            <Stack.Screen name="my-designs" component={MyDesignsScreen} options={{ header: () => <MainHeader /> }} />
-            <Stack.Screen name="+not-found" component={NotFoundScreen} options={{ header: () => <MainHeader /> }} />
-          </Stack.Navigator>
+          <SignedIn>
+            <AppNavigator />
+          </SignedIn>
+          <SignedOut>
+            <WelcomeScreen />
+          </SignedOut>
           <Footer />
           <StatusBar style="auto" />
         </PaperProvider>
