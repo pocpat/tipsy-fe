@@ -1,39 +1,48 @@
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+// 1. Remove SignOutButton from the import, but get `signOut` from the useAuth hook
 import { useAuth, useOAuth } from '@clerk/clerk-expo';
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri } from 'expo-auth-session';
-import { Alert } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
 
 const WelcomeScreen = () => {
-  const { isSignedIn } = useAuth();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
+  // 2. Destructure the signOut function from the useAuth hook
+  const { isLoaded, isSignedIn, signOut } = useAuth();
 
-  const { startOAuthFlow } = useOAuth({
-    strategy: 'oauth_google',
-  });
+  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
 
   const onSignInPress = React.useCallback(async () => {
-    console.log('onSignInPress called');
     try {
-      console.log('Before startOAuthFlow');
-      const redirectUrl = makeRedirectUri({ scheme: 'tipsyfe' });
-      console.log('Redirect URL:', redirectUrl);
-      const { createdSessionId, setActive } = await startOAuthFlow({ redirectUrl });
-      console.log('After startOAuthFlow');
-      console.log('OAuth flow completed.');
-
+      const { createdSessionId, setActive } = await startOAuthFlow();
       if (createdSessionId && setActive) {
         setActive({ session: createdSessionId });
       }
     } catch (err: any) {
-      console.error("OAuth error:", err);
-      Alert.alert("Login Error", err.message || "An unexpected error occurred during login.");
+      console.error("OAuth Error:", JSON.stringify(err, null, 2));
+      Alert.alert("Login Error", err.errors?.[0]?.message || "An unexpected error occurred.");
     }
-  }, []);
+  }, [startOAuthFlow]);
+
+  // 3. Create a simple handler function to call signOut
+  const onSignOutPress = async () => {
+    try {
+      await signOut();
+    } catch (err) {
+      console.error("SignOut Error:", err);
+      Alert.alert("Logout Error", "An unexpected error occurred during logout.");
+    }
+  };
+
+  if (!isLoaded) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#007bff" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -42,20 +51,28 @@ const WelcomeScreen = () => {
 
       <TouchableOpacity
         style={[styles.button, !isSignedIn && styles.buttonDisabled]}
-        onPress={() => navigation.navigate('design' as never)}
+        onPress={() => navigation.navigate('DesignForm')}
         disabled={!isSignedIn}>
         <Text style={styles.buttonText}>Press to start</Text>
       </TouchableOpacity>
 
       <View style={styles.authButtons}>
-        <TouchableOpacity onPress={onSignInPress}>
-          <Text style={styles.authButtonText}>Login / Sign Up</Text>
-        </TouchableOpacity>
+        {isSignedIn ? (
+          // 4. Use a regular TouchableOpacity and call your new handler on press
+          <TouchableOpacity onPress={onSignOutPress}>
+            <Text style={styles.authButtonText}>Logout</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={onSignInPress}>
+            <Text style={styles.authButtonText}>Login / Sign Up with Google</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
 };
 
+// Styles remain the same
 const styles = StyleSheet.create({
   container: {
     flex: 1,

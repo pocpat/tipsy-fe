@@ -30,14 +30,15 @@ const ResultsScreen = () => {
     setApiError(null);
     try {
       const response = await generateDesigns(selections, getToken);
-      setGeneratedImages(response.imageUrls);
+      console.log('Setting generated images:', response.data);
+      setGeneratedImages(response.data);
     } catch (error: any) {
       console.error('Failed to generate designs:', error);
       setApiError(error.message || 'Failed to generate designs.');
     } finally {
       setLoading(false);
     }
-  }, [selections]);
+  }, [selections, getToken]);
 
   useEffect(() => {
     if (selections) {
